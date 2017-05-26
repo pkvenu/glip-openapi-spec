@@ -1,0 +1,1012 @@
+---
+swagger: '2.0'
+schemes:
+  - https
+host: platform.ringcentral.com
+basePath: "/restapi/v1.0"
+info:
+  title: RingCentral Glip 
+  description: RingCentral Glip Messaging API
+  version: 1.0.0
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: devsupport@ringcentral.com
+  x-logo:
+    url: 'https://developers.ringcentral.com/assets/images/logo_beta.svg'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: Glip
+    description: API related to glip
+securityDefinitions:
+    glip_auth:
+      description: |
+        Get access to data while protecting your accoutn 
+      type: oauth2
+      authorizationUrl: 'http://petstore.swagger.io/api/oauth/dialog'
+      flow: implicit
+      scopes: 
+        'glip': permission for glip
+        'subscribe_webhook': subscribe to incoming webhooks
+    api_key:
+      description: |
+        for this sample you could use api key `special key` to test authorization filters.
+      type: apiKey
+      name: api_key
+      in: header
+x-servers:
+  - url: //platform.ringcentral.com/restapi/v1.0
+    description: Production
+  - url: //platform.devtest.ringcentral.com/restapi/v1.0
+    description: Sandbox
+paths:
+  "/glip/persons/{personId}":
+    get:
+      tags:
+        - Glip
+      summary: Get Person by ID
+      description: Returns a person by id. If the person cannot be accessed by current
+        user, API must return HTTP 404.
+      operationId: getPersonByID
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: personId
+          description: The personId being requested. Can be `~` for current user.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: a Person object.
+          schema:
+            $ref: '#/definitions/Person'
+          examples:
+            application/json: |
+                {
+                  "id":"123456",
+                  "firstName":"John",
+                  "lastName":"Doe",
+                  "avatar":"https://glip-prod.s3.amazonaws.com/web/customer_files/123456/ava.jpg",
+                  "email":"john.doe@acme.com",
+                  "companyId": "456789",
+                  "creationTime":"2015-05-05T12:00:00Z",
+                  "lastModifiedTime":"2016-03-05T12:00:00Z"
+                }
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Person not found
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"
+  "/companies/{companyId}":
+    get:
+      tags:
+        - Glip
+      summary: Get Company Info
+      description: Returns a company by id
+      operationId: getCompanyInfo
+      produces: 
+        - application/json
+      parameters:
+        - name: companyId
+          in: path
+          description: The id of the company being queried. Can be '~' for company the
+            current user belongs to.
+          required: true
+          type: string
+          default: "~"
+      responses:
+        '200':
+          description: a Company object.
+          schema:
+            $ref: '#/definitions/Company'
+          examples:
+            application/json: |
+              {
+                "id": "456789",
+                "name": "Ringcentral",
+                "domain": "mydomain.com",
+                "creationTime": "2015-05-05T12:00:00Z",
+                "lastModifiedTime": "2016-03-05T12:00:00Z"
+              }
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Company not found
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"        
+  "/groups":
+    get:
+      tags:
+        - Glip
+      summary: Return groups associated with current user
+      description: Return groups associated with current user
+      operationId: getGroups
+      consumes: 
+        - application/json
+      produces: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Read groups JSON body
+          required: true
+          schema:
+            $ref: '#/definitions/ReadGroupsRequest'
+      responses:
+        '200':
+          description: a list of Group objects.
+          schema:
+            $ref: '#/definitions/ReadGroupsResponse'
+          examples:
+            application/json: |-
+              {
+                "records": [
+                  {
+                    "id":"637468356",
+                    "type": "Group",
+                    "name":"John John",
+                    "members": [
+                      "12464564",
+                      "2344565255"
+                    ],
+                    "creationTime":"2015-05-05T12:00:00Z",
+                    "lastModifiedTime":"2016-03-05T12:00:00Z"
+                  },
+                  {
+                    "id":"637468356",
+                    "type": "Team",
+                    "displayName":"Some group",
+                    "isPublic": true,
+                    "description":"My team",
+                    "creationTime":"2015-05-05T12:00:00Z",
+                    "lastModifiedTime":"2016-03-05T12:00:00Z",
+                    "members": [
+                      "12464564",
+                      "2344565255"
+                     ]
+                  }
+                ],
+                "navigation": {
+                  "nextPageToken": "62hdfjhq87xjh",
+                  "prevPageToken": "fgghjsdgfsjf"
+                }
+              }
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+        '405':
+          description: Validation exception
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"        
+    post:
+      tags:
+        - Glip
+      summary: Create New Team 
+      description: Creates Group/Team
+      operationId: createTeam
+      consumes: 
+        - application/json
+      produces: 
+        - application/json
+      parameters:
+      - name: body
+        in: body
+        description: Create Group JSON body
+        required: true
+        schema:
+          $ref: '#/definitions/ReadTeamRequest'
+      responses:
+        '200':
+          description: Post or 404. If Group with groupId doesn't exists or user doesn't
+            belong to the group, 404 should be returned.
+          schema:
+            $ref: '#/definitions/Team'
+          examples:
+            application/json: |-
+              {
+                "id": "87654321",
+                "type": "Team",
+                "name":"My Team",
+                "isPublic": true,
+                "description": "Best team ever",
+                "creationTime": "2017-01-23T17:00:00Z",
+                "lastModifiedTime": "2017-01-23T17:09:00Z",
+                "members": ["12345678", "glip-43218765"]
+              }
+        '404':
+          description: If Group with groupId doesn't exists or user doesn't belong
+            to the group, 404 should be returned.
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"              
+  "/groups/{groupId}":
+    get:
+      tags:
+        - Glip
+      summary: Returns a group by id
+      description: Returns a group by id
+      operationId: getGroupById
+      produces: 
+        - application/json
+      parameters:
+      - name: groupId
+        in: path
+        description: Id of a group to be fetched
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Get Group objects.
+          schema:
+            $ref: '#/definitions/Group'
+          examples:
+            application/json: |-
+              {
+                "id":"637468356",
+                "type": "Team",
+                "name":"Some group",
+                "isPublic": true,
+                "description": "Best team ever",
+                "creationTime":"2015-05-05T12:00:00Z",
+                "lastModifiedTime":"2016-03-05T12:00:00Z",
+                "members": [
+                  "12464564",
+                  "23445652"
+                ]
+              }
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"        
+    put:
+      tags:
+        - Glip
+      summary: Edit Group/Team
+      description: Updates team name, description and access level
+      operationId: editGroup
+      consumes: 
+        - application/json
+      produces: 
+        - application/json
+      parameters:
+        - name: groupId
+          in: path
+          description: The id of the group being queried. 
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Update group JSON body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTeamRequest'
+      responses:
+        '200':
+          description: If Group with groupId doesn't exists , 404 should be returned.
+          schema:
+            $ref: '#/definitions/Team'
+          examples:
+            application/json: |-
+              {
+                "id": "87654321",
+                "type": "Team",
+                "name":"My Team +",
+                "isPublic": false,
+                "description": "The Best team ever",
+                "creationTime": "2017-01-23T17:00:00Z",
+                "lastModifiedTime": "2017-01-23T17:09:00Z",
+                "members": ["12345678", "glip-43218765"]
+              }
+        '404':
+          description: If Group with groupId doesn't exists, 404 should be returned.
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"              
+  "/groups/{groupId}/bulk-assign":
+    post:
+      tags:
+        - Glip
+      summary: Modify Group members list 
+      description: Creates Group/Team
+      operationId: addRemoveGroupMembers
+      consumes: 
+        - application/json
+      produces: 
+        - application/json
+      parameters:
+        - name: groupId
+          in: path
+          description: The id of the group being queried. 
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Create/Remove Person JSON body
+          required: true
+          schema:
+            $ref: '#/definitions/BulkAssignRequest'
+      responses:
+        '200':
+          description: Post or 404. If Group with groupId doesn't exists or user doesn't
+            belong to the group, 404 should be returned.
+          schema:
+            $ref: '#/definitions/Team'
+          examples:
+            application/json: |-
+             {
+              "id": "12345678",
+              "type": "Team",
+              "name":"My Team",
+              "isPublic": true,
+              "description": "Best team ever",
+              "creationTime": "2017-01-23T17:00:00Z",
+              "lastModifiedTime": "2017-01-23T17:09:00Z",
+              "members": ["111222333", "444555666", "glip-43218765"]
+             }
+        '404':
+          description: If Group with groupId doesn't exists, 404 should be returned.
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"              
+  "/posts":
+    get:
+      tags:
+        - Glip
+      summary: Get Posts by Group ID
+      description: Return a list of posts in a group . Not more than 250 records to
+        be returned in one request. If posts cannot be viewed by current user (fro
+        example, user is not member of group), API must return HTTP 404.
+      operationId: getPostsByGroupId
+      consumes: 
+        - application/json
+      produces: 
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Create post JSON body
+          required: true
+          schema:
+            $ref: '#/definitions/ReadPostsRequest'
+      responses:
+        '200':
+          description: a list of post objects.
+          schema:
+            $ref: '#/definitions/ReadPostsResponse'
+          examples:
+            application/json: |-
+              {
+                "navigation" : {
+                  "prevPageToken" : "fgghjsdgfsjf",
+                  "nextPageToken" : "62hdfjhq87xjh"
+                },
+                "records" : [ {
+                  "lastModifiedTime" : "2016-12-15T12:00:00Z",
+                  "creationTime" : "2016-12-15T12:00:00Z",
+                  "groupId" : "456775",
+                  "creatorId" : "5574664564",
+                  "id" : "637468356",
+                  "text" : "Hi there!",
+                  "type": "TextMessage",
+                  "addedPersonIds": null,
+                  "attachements": []
+                }, {
+                  "lastModifiedTime" : "2017-02-09T12:00:00Z",
+                  "creationTime" : "2017-02-09T12:00:00Z",
+                  "groupId" : "456775",
+                  "id" : "583748574",
+                  "creatorId" : "5574664564",
+                  "text" : null,
+                  "type": "PersonsAdded",
+                  "addedPersonIds": [ "473856", "glip_293485" ],
+                  "attachements": []
+                } ]
+              }
+        '404':
+          description: No content.
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"        
+    post:
+      tags:
+        - Glip
+      summary: Send New Message
+      description: Creates post and send it to specified Group and returns it.
+      operationId: createPost
+      consumes: 
+        - application/json
+      produces: 
+        - application/json
+      parameters:
+      - name: body
+        in: body
+        description: Create post JSON body
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePostRequest'
+      responses:
+        '200':
+          description: Post or 404. If Group with groupId doesn't exists or user doesn't
+            belong to the group, 404 should be returned.
+          schema:
+            $ref: '#/definitions/Post'
+          examples:
+            application/json: |-
+              {
+                "lastModifiedTime" : "2016-12-15T12:00:00Z",
+                "creationTime" : "2016-12-15T12:00:00Z",
+                "groupId" : "456775",
+                "creatorId" : "5574664564",
+                "id" : "637468356",
+                "text" : "Hi there!",
+                "type": "TextMessage",
+                "addedPersonIds": null,
+                "attachements": []
+              }
+        '404':
+          description: If Group with groupId doesn't exists or user doesn't belong
+            to the group, 404 should be returned.
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"        
+  "/posts/{postId}":
+    get:
+      summary: Get Post By Id
+      description: Returns post with given id. If a post cannot be viewed by current
+        user, API must return HTTP 404.
+      tags:
+      - Glip
+      parameters:
+      - name: postId
+        in: path
+        description: Id of a post to be fetched
+        required: true
+        type: string
+      responses:
+        '200':
+          description: a list of Group objects.
+          schema:
+           $ref: '#/definitions/ReadPostsResponse'
+          examples:
+            application/json: |-
+              {
+                "id": "637468356",
+                "text": "Hi there!",
+                "creatorId": "5574664564",
+                "groupId": "456775",
+                "creationTime": "2015-05-05T12:00:00Z",
+                "lastModifiedTime": "2016-03-05T12:00:00Z"
+              }
+        '404':
+          description: No content.
+      security: 
+        - glip_auth: 
+          - 'glip'
+      x-code-samples:
+        - lang: 'C#'
+          source: |
+            PetStore.v1.Pet pet = new PetStore.v1.Pet();
+            pet.setApiKey("your api key");
+            pet.petType = PetStore.v1.Pet.TYPE_DOG;
+            pet.name = "Rex";
+            // set other fields
+            PetStoreResponse response = pet.create();
+            if (response.statusCode == HttpStatusCode.Created)
+            {
+              // Successfully created
+            }
+            else
+            {
+              // Something wrong -- check response for errors
+              Console.WriteLine(response.getRawResponse());
+            }
+        - lang: PHP
+          source: "$form = new \\PetStore\\Entities\\Pet();\n$form->setPetType(\"Dog\");\n$form->setName(\"Rex\");\n// set other fields\ntry {\n    $pet = $client->pets()->create($form);\n} catch (UnprocessableEntityException $e) {\n    var_dump($e->getErrors());\n}\n"        
+definitions:
+  Person:
+    description: A representation of Person.
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of person
+      firstName:
+        type: string
+        description: First name of person
+      lastName:
+        type: string
+        description: Last name of person
+      gender:
+        type: string
+        description: Gender of person
+      email:
+        type: string
+        description: Email of user
+      avatar:
+        type: string
+        description: Photo of user
+      companyId:
+        type: string
+        description: ID of company person belongs to
+      creationTime:
+        type: string
+        description: Time of creation (ISO format)
+      lastModifiedTime:
+        type: string
+        description: Time of last modification (ISO format)
+  Company:
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of company
+      name:
+        type: string
+        description: Name of company
+      domain:
+        type: string
+        description: Domain name of company
+      creationTime:
+        type: string
+        description: Time of creation (ISO format)
+      lastModifiedTime:
+        type: string
+        description: Time of last modification (ISO format) 
+  Team:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Id of team
+      type:
+        type: string
+        description: Type of group
+        enum:
+        - Group
+        - Team
+      name:
+        type: string
+        description: Name of team
+      members:
+        type: array
+        items:
+          type: string
+        description: Array of group participants
+      isPublic:
+        type: boolean
+        description: Shows if team is public or not
+      creationTime:
+        type: string
+        description: Time of creation (ISO format)
+      lastModifiedTime:
+        type: string
+        description: Time of last modification (ISO format)
+  Group:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Id of group
+      description:
+        type: string
+        description: Group description
+      type:
+        type: string
+        description: Type of group. 
+        enum:
+          - PrivateChat
+          - Group
+          - Team
+      name:
+        type: string
+        description: Name of team
+      members:
+        type: array
+        items:
+          type: string
+        description: Array of group participants
+      isPublic:
+        type: boolean
+        description: Group couldn't be public
+      creationTime:
+        type: string
+        description: Time of creation (ISO format)
+      lastModifiedTime:
+        type: string
+        description: Time of last modification (ISO format)
+  Post:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Id of post
+      creatorId:
+        type: string
+        description: Id of person created post
+      groupId:
+        type: string
+        description: Id of group oist belongs to
+      text:
+        type: boolean
+        description: Text of message
+      creationTime:
+        type: string
+        description: Time of creation (ISO format)
+      lastModifiedTime:
+        type: string
+        description: Time of last modification (ISO format)
+  BulkAssignRequest:
+    type: object
+    properties:
+      addedPersonIds:
+        type: array
+        items:
+          type: string
+          description: add persons by Id
+      addedPersonEmails:
+        type: array
+        items:
+          type: string
+          description: add persons by Email
+      removedPersonIds:
+        type: array
+        items:
+          type: string
+          description: delete person by Id.
+  ReadTeamRequest:
+    type: object
+    properties:
+      type:
+        type: string
+        description: Type of groups to be fetched
+        enum: 
+          - PrivateChat
+          - Group
+          - Team
+      name:
+        type: string
+        description: Name of team
+      members:
+        type: array
+        items:
+          type: string
+        description: Array of group participants  
+      description:
+        type: string
+        description: Team Description
+  UpdateTeamRequest:
+    type: object
+    properties:
+      isPublic:
+        type: boolean
+        description: Team public or private
+      name:
+        type: string
+        description: Name of team
+      description:
+        type: string
+        description: Team Description      
+  ReadGroupsRequest:
+    type: object
+    properties:
+      type:
+        type: string
+        description: Type of groups to be fetched
+        enum: 
+          - PrivateChat
+          - Group
+          - Team
+      pageToken:
+        type: string
+        description: Pagination token
+      recordCount:
+        type: integer
+        description: Max number of records to return. Default and maximum is 250.
+  ReadGroupsResponse:
+    type: object
+    properties:
+      records:
+        type: array
+        items:
+          properties:
+            id:
+              type: string
+              description: Id of team
+            type:
+              type: string
+              description: Type of group
+              enum:
+                - PrivateChat
+                - Group
+                - Team
+            name:
+              type: string
+              description: Name of team
+            members:
+              type: array
+              items:
+                type: string
+              description: Array of group participants
+            isPublic:
+              type: boolean
+              description: Shows if team is public or not
+            creationTime:
+              type: string
+              description: Time of creation (ISO format)
+            lastModifiedTime:
+              type: string
+              description: Time of last modification (ISO format)
+        description: a list of post objects within a response envelope
+      navigation:
+        type: object
+        properties:
+          prevPage:
+            type: string
+            description: prev page token. To get previous page, user should pass one
+              of returned token in next request and, in turn, required page will be
+              returned with new tokens.
+          nextPage:
+            type: string
+            description: next page token. To get next page, user should pass one of
+              returned token in next request and, in turn, required page will be returned
+              with new tokens.
+  CreatePostRequest:
+    type: object
+    properties:
+      groupId:
+        type: string
+        description: Id of a group to send post to
+      text:
+        type: string
+        description: Text of a post,up to 10000 unicode characters. All text must
+          be returned
+  ReadPostsResponse:
+    type: object
+    properties:
+      records:
+        type: array
+        items:
+          properties:
+            id:
+              type: string
+              description: Id of post
+            creatorId:
+              type: string
+              description: Id of person created post
+            groupId:
+              type: string
+              description: Id of group oist belongs to
+            text:
+              type: boolean
+              description: Text of message
+            type:
+              type: string
+              description: Type pf message 
+              enum: 
+                - TextMessage
+                - PersonJoined
+                - PersonAdded
+            addedPersonIds:
+              type: array
+              items:
+                type: string
+                description: Id's of persons added.
+            creationTime:
+              type: string
+              description: Time of creation (ISO format)
+            lastModifiedTime:
+              type: string
+              description: Time of last modification (ISO format)
+        description: a list of post objects within a response envelope
+      navigation:
+        type: object
+        properties:
+          prevPage:
+            type: string
+            description: prev page token. To get previous page, user should pass one
+              of returned token in next request and, in turn, required page will be
+              returned with new tokens.
+          nextPage:
+            type: string
+            description: next page token. To get next page, user should pass one of
+              returned token in next request and, in turn, required page will be returned
+              with new tokens.
+  ReadPostsRequest:
+    type: object
+    properties:
+      groupId:
+        type: string
+        description: Id of a group to filter posts
+      paginationToken:
+        type: string
+        description: Pagination token
+      recordCount:
+        type: integer
+        description: Max number of records to return. Either of creationTimeFrom or
+          creationTimeTo must be set, not both
